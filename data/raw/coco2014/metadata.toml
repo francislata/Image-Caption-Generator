@@ -1,0 +1,22 @@
+# COCO2014 Metadata File: Training, Validation, and Test COCO Datasets from Microsoft - http://cocodataset.org/.
+
+# URLs
+train_ds_url = "http://images.cocodataset.org/zips/train2014.zip"
+val_ds_url = "http://images.cocodataset.org/zips/val2014.zip"
+test_ds_url = "http://images.cocodataset.org/zips/test2014.zip"
+anns_url = "http://images.cocodataset.org/annotations/annotations_trainval2014.zip"
+
+# ZIP filenames
+train_ds_filename = "train2014.zip"
+val_ds_filename = "val2014.zip"
+test_ds_filename = "test2014.zip"
+anns_filename = "annotations.zip"
+
+# CSV filenames
+train_ds_csv_filename = "train2014.csv"
+val_ds_csv_filename = "val2014.csv"
+test_ds_csv_filename = "test2014.csv"
+
+# JSON filenames
+train_ds_anns_filename = "captions_train2014.json"
+val_ds_anns_filename = "captions_val2014.json"

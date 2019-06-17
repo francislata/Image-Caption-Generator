@@ -1,4 +1,5 @@
 from dataset.dataset import COCODataset
+from model.encoder import Encoder
 import argparse
 
 def _parse_arguments():
@@ -14,13 +15,18 @@ def _parse_arguments():
 
     return args_parser.parse_args()
 
-def main(args):
-    print("Creating training and validation datasets...")
 
+def main(args):
+    """The main entrypoint of this program"""
+
+    print('Creating training and validation datasets...')
     train_ds = COCODataset(args.train_images_file_path, args.train_csv_file_path)
     valid_ds = COCODataset(args.valid_images_file_path, args.valid_csv_file_path)
-    
-    print("Done!\n")
+    print('Done!\n')
+
+    print('Initializing model...')
+    encoder = Encoder()
+    print('Done!\n')
     
 
 if __name__ == '__main__':

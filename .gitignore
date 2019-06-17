@@ -1,5 +1,24 @@
+# VSCode files
+.vscode
+
 # Python files
 __pycache__
 
 # macOS files
 .DS_Store
+
+# Jupyter files
+.ipynb_checkpoints
+
+# Project files\
+data/raw/coco2014/train2014.zip
+data/raw/coco2014/val2014.zip
+data/raw/coco2014/test2014.zip
+data/raw/coco2014/annotations.zip
+data/raw/coco2014/train2014.csv
+data/raw/coco2014/val2014.csv
+data/raw/coco2014/test2014.csv
+data/raw/coco2014/train2014
+data/raw/coco2014/val2014
+data/raw/coco2014/test2014
+data/raw/coco2014/annotations
