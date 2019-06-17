@@ -10,7 +10,7 @@ __pycache__
 # Jupyter files
 .ipynb_checkpoints
 
-# Project files\
+# Project files
 data/raw/coco2014/train2014.zip
 data/raw/coco2014/val2014.zip
 data/raw/coco2014/test2014.zip
@@ -22,3 +22,5 @@ data/raw/coco2014/train2014
 data/raw/coco2014/val2014
 data/raw/coco2014/test2014
 data/raw/coco2014/annotations
+
+caption_generator/datasets/pycocotools

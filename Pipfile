@@ -21,3 +21,6 @@ tqdm = "*"
 
 [requires]
 python_version = "3.7"
+
+[scripts]
+install_cocoapi = "bash ./tasks/install_cocoapi.sh"
