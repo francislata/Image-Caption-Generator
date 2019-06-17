@@ -23,16 +23,15 @@ class COCO2014(Dataset):
 
     def __getitem__(self, idx):
         if self.is_test_set:
-            img = self._create_img_filename(self.samples[idx][0], is_img_id=False)
+            img = self.create_img_filename(self.samples[idx][0], is_img_id=False)
         else:
-            img = self._create_img_filename(str(self.samples[idx][0]))
+            img = self.create_img_filename(str(self.samples[idx][0]))
 
         with Image.open(img) as img:
             img = self.transforms(img)
             return img, literal_eval(self.samples[idx][-1]) if not self.is_test_set else None
 
-    def _create_img_filename(self, img, is_img_id=True):
-        """Creates the complete image filename based on the image ID."""
+    def create_img_filename(self, img, is_img_id=True):
         metadata = toml.load(self.metadata_path)
         img_filename = TRAIN_IMG_FILENAME
         dir_file_path = os.path.join(self.dataset_path, metadata['train_ds_filename'])

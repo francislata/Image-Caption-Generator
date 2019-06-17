@@ -35,6 +35,10 @@ class Dataset(TorchDataset):
     def __getitem__(self, idx):
         raise NotImplementedError
 
+    def create_img_filename(self, img, is_img_id=True):
+        """Creates the complete image filename based on the image ID."""
+        raise NotImplementedError
+
     def _load_dataset(self):
         """Loads (and optionally downloads) the dataset."""
         metadata = toml.load(self.metadata_path)
