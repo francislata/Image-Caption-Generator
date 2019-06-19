@@ -13,7 +13,7 @@ git clone https://github.com/cocodataset/cocoapi.git caption_generator/datasets/
 
 # Install pycocotools
 cd caption_generator/datasets/cocoapi/PythonAPI
-make all
+make install
 
 # Move pycocotools to caption_generator/datasets
 mv ./pycocotools ../../
