@@ -1,6 +1,5 @@
 """This contains the definition of how to create the COCO 2014 dataset."""
 
-from ast import literal_eval
 from collections import defaultdict
 from pathlib import Path
 import os
@@ -23,6 +22,7 @@ class COCO2014(Dataset):
     def __init__(self, is_validation_set=False, is_test_set=False):
         super(COCO2014, self).__init__(DATASET_PATH, METADATA_PATH, is_validation_set, is_test_set)
 
+        self.vocab = None
         self.load_dataset()
 
     def __len__(self):
@@ -36,7 +36,11 @@ class COCO2014(Dataset):
 
         with Image.open(img) as img:
             img = self.transforms(img)
-            return img, literal_eval(self.samples[idx][-1]) if not self.is_test_set else None
+
+            if self.is_test_set:
+                return img
+
+            return img, self.vocab.preprocess_annotation(self.samples[idx][-1])
 
     def _create_img_filename(self, img, is_img_id=True):
         """Creates the complete image filename based on the image ID."""

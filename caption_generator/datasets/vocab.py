@@ -17,13 +17,24 @@ class Vocab: #pylint: disable=too-few-public-methods
         self.stoi_path = os.path.join(ds_path, STOI_FILENAME)
         self.stoi = self._load_stoi()
 
-        self._load_vocab(train_csv_file_path)
-
-        if val_csv_file_path:
-            self._load_vocab(val_csv_file_path)
-
         if not os.path.isfile(self.stoi_path):
+            self._load_vocab(train_csv_file_path)
+
+            if val_csv_file_path:
+                self._load_vocab(val_csv_file_path)
+
             save_to_json(self.stoi, self.stoi_path)
+
+    def preprocess_annotation(self, annotation):
+        """Preprocesses the tokenized annotation."""
+        preprocessed_annotation = [self.stoi[SOS_TOKEN]]
+
+        for token in self.nlp(annotation):
+            preprocessed_annotation.append(self.stoi[token.text.lower()])
+
+        preprocessed_annotation.append(self.stoi[EOS_TOKEN])
+
+        return preprocessed_annotation
 
     def _load_stoi(self):
         """Loads the JSON file for the strings to index mapping."""
@@ -36,24 +47,13 @@ class Vocab: #pylint: disable=too-few-public-methods
         """Loads (and creates the vocabulary) from dataset."""
         ds_df = pd.read_csv(csv_file_path)
 
-        if not 'tokenized_annotations' in ds_df.columns:
-            print('Tokenizing and building vocabulary of {}...'.format(csv_file_path))
+        print('Building vocabulary of {}...'.format(csv_file_path))
 
-            tokenized_annotations = []
-            samples = ds_df.values.tolist()
+        samples = ds_df.values.tolist()
 
-            for sample in tqdm(iterable=samples, total=len(samples)):
-                tokenized_annotation = []
+        for sample in tqdm(iterable=samples, total=len(samples)):
+            for token in self.nlp(sample[-1]):
+                if not token.text.lower() in self.stoi:
+                    self.stoi[token.text.lower()] = len(self.stoi)
 
-                for token in self.nlp(sample[-1]):
-                    tokenized_annotation.append(token)
-
-                    if not token.text.lower() in self.stoi:
-                        self.stoi[token.text.lower()] = len(self.stoi)
-
-                tokenized_annotations.append(tokenized_annotation)
-
-            ds_df['tokenized_annotations'] = tokenized_annotations
-            ds_df.to_csv(csv_file_path, index=False)
-
-            print('Done!\n')
+        print('Done!\n')
