@@ -2,6 +2,7 @@
 
 import os
 from zipfile import ZipFile
+import json
 from tqdm import tqdm
 import requests
 
@@ -50,3 +51,13 @@ def extract_zip(zip_file_path, destination_file_path):
             zip_file.extract(file, path=destination_file_path)
 
     print('Done!\n')
+
+def save_to_json(data, file_path):
+    """Saves the data as a JSON file in the given file path."""
+    with open(file_path, 'w') as json_fp:
+        json.dump(data, json_fp)
+
+def load_json(file_path):
+    """Loads the data from the JSON file."""
+    with open(file_path, 'r') as json_fp:
+        return json.load(json_fp)

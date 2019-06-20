@@ -1,9 +1,9 @@
 """This contains the definition of how to create the COCO 2014 dataset."""
 
-from pathlib import Path
-import os
 from ast import literal_eval
 from collections import defaultdict
+from pathlib import Path
+import os
 from PIL import Image
 import toml
 import pandas as pd
@@ -95,9 +95,10 @@ class COCO2014(Dataset):
 
         self.samples = self.samples.values.tolist()
 
-    def _create_img_to_lbl_csv(self, ds_path, anns_file_path, csv_filename): #pylint: disable=no-self-use
+    def _create_img_to_lbl_csv(self, ds_path, anns_file_path, csv_filename): #pylint: disable=no-self-use,too-many-locals
         """Creates a CSV file used for mapping images to its labels."""
-        img_caps_mapping, image_ids, annotations = defaultdict(list), [], []
+        img_caps_mapping = defaultdict(list)
+        image_ids, annotations = [], []
 
         if anns_file_path:
             coco_captions = COCO(anns_file_path)
@@ -109,7 +110,7 @@ class COCO2014(Dataset):
 
             for img_id, captions in tqdm(iterable=img_caps_mapping.items(), total=len(img_caps_mapping.items())): #pylint: disable=line-too-long
                 image_ids.append(img_id)
-                annotations.append(captions)
+                annotations.append(captions[0])
 
             print('Done!\n')
         else:

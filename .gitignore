@@ -18,6 +18,7 @@ data/raw/coco2014/annotations.zip
 data/raw/coco2014/train2014.csv
 data/raw/coco2014/val2014.csv
 data/raw/coco2014/test2014.csv
+data/raw/coco2014/stoi.json
 data/raw/coco2014/train2014
 data/raw/coco2014/val2014
 data/raw/coco2014/test2014
