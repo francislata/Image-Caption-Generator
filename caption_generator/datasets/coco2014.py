@@ -7,6 +7,7 @@ from PIL import Image
 import toml
 import pandas as pd
 from tqdm import tqdm
+import torch
 from pycocotools.coco import COCO
 from .dataset import Dataset
 from .util import download_from_url, extract_zip
@@ -40,7 +41,7 @@ class COCO2014(Dataset):
             if self.is_test_set:
                 return img
 
-            return img, self.vocab.preprocess_annotation(self.samples[idx][-1])
+            return img, torch.LongTensor(self.vocab.preprocess_annotation(self.samples[idx][-1]))
 
     def _create_img_filename(self, img, is_img_id=True):
         """Creates the complete image filename based on the image ID."""
@@ -95,11 +96,13 @@ class COCO2014(Dataset):
         if os.path.isfile(ds_csv_filename):
             self.samples = pd.read_csv(ds_csv_filename)
         else:
-            self.samples = self._create_img_to_lbl_csv(ds_path[:-4], anns_file_path, ds_csv_filename) #pylint: disable=line-too-long
+            self.samples = self._create_img_to_lbl_csv(ds_path[:-4],
+                                                       anns_file_path,
+                                                       ds_csv_filename)
 
         self.samples = self.samples.values.tolist()
 
-    def _create_img_to_lbl_csv(self, ds_path, anns_file_path, csv_filename): #pylint: disable=no-self-use,too-many-locals
+    def _create_img_to_lbl_csv(self, ds_path, anns_file_path, csv_filename): #pylint: disable=no-self-use
         """Creates a CSV file used for mapping images to its labels."""
         img_caps_mapping = defaultdict(list)
         image_ids, annotations = [], []
@@ -112,7 +115,8 @@ class COCO2014(Dataset):
             for image_caption in coco_captions.loadAnns(coco_captions.getAnnIds()):
                 img_caps_mapping[image_caption['image_id']].append(image_caption['caption'])
 
-            for img_id, captions in tqdm(iterable=img_caps_mapping.items(), total=len(img_caps_mapping.items())): #pylint: disable=line-too-long
+            for img_id, captions in tqdm(iterable=img_caps_mapping.items(),
+                                         total=len(img_caps_mapping.items())):
                 image_ids.append(img_id)
                 annotations.append(captions[0])
 

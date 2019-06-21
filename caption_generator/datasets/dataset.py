@@ -8,7 +8,12 @@ IMAGENET_STD = [0.229, 0.224, 0.225]
 
 class Dataset(TorchDataset):
     """Base class of different datasets which handles dataset download, extraction and usage."""
-    def __init__(self, dataset_path, metadata_path, is_validation_set=False, is_test_set=False, img_size=(226, 226)): #pylint: disable=line-too-long,too-many-arguments
+    def __init__(self,
+                 dataset_path,
+                 metadata_path,
+                 is_validation_set=False,
+                 is_test_set=False,
+                 img_size=(226, 226)):
         self.dataset_path = dataset_path
         self.metadata_path = metadata_path
         self.is_validation_set = is_validation_set
