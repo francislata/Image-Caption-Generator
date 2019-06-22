@@ -41,25 +41,7 @@ class COCO2014(Dataset):
             if self.is_test_set:
                 return img
 
-            return img, torch.LongTensor(self.vocab.preprocess_annotation(self.samples[idx][-1]))
-
-    def _create_img_filename(self, img, is_img_id=True):
-        """Creates the complete image filename based on the image ID."""
-        metadata = toml.load(self.metadata_path)
-        img_filename = TRAIN_IMG_FILENAME
-        dir_file_path = os.path.join(self.dataset_path, metadata['train_ds_filename'])
-
-        if self.is_validation_set:
-            img_filename = VAL_IMG_FILENAME
-            dir_file_path = os.path.join(self.dataset_path, metadata['val_ds_filename'])
-        elif self.is_test_set:
-            img_filename = TEST_IMG_FILENAME
-            dir_file_path = os.path.join(self.dataset_path, metadata['test_ds_filename'])
-
-        if is_img_id:
-            img = img_filename.format('0' * (12 - len(img)) + img)
-
-        return os.path.join(dir_file_path[:-4], img)
+            return img, torch.LongTensor(self.vocab.preprocess_annotation(self.samples[idx][-1])) #pylint: disable=no-member
 
     def load_dataset(self):
         metadata = toml.load(self.metadata_path)
@@ -101,6 +83,24 @@ class COCO2014(Dataset):
                                                        ds_csv_filename)
 
         self.samples = self.samples.values.tolist()
+
+    def _create_img_filename(self, img, is_img_id=True):
+        """Creates the complete image filename based on the image ID."""
+        metadata = toml.load(self.metadata_path)
+        img_filename = TRAIN_IMG_FILENAME
+        dir_file_path = os.path.join(self.dataset_path, metadata['train_ds_filename'])
+
+        if self.is_validation_set:
+            img_filename = VAL_IMG_FILENAME
+            dir_file_path = os.path.join(self.dataset_path, metadata['val_ds_filename'])
+        elif self.is_test_set:
+            img_filename = TEST_IMG_FILENAME
+            dir_file_path = os.path.join(self.dataset_path, metadata['test_ds_filename'])
+
+        if is_img_id:
+            img = img_filename.format('0' * (12 - len(img)) + img)
+
+        return os.path.join(dir_file_path[:-4], img)
 
     def _create_img_to_lbl_csv(self, ds_path, anns_file_path, csv_filename): #pylint: disable=no-self-use
         """Creates a CSV file used for mapping images to its labels."""

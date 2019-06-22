@@ -3,8 +3,6 @@
 from torchvision.models import resnet101
 import torch.nn as nn
 
-# TODO: Might need to flip to ensure that batch size is returned as the second dimension
-
 class ResNet101LSTM(nn.Module):
     """This subclass creates a network with ResNet101 and LSTM."""
     def __init__(self, vocab, **kwargs):

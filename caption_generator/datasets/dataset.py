@@ -1,6 +1,7 @@
 """This contains the base class that represents any dataset used."""
 
 from torch.utils.data import Dataset as TorchDataset
+from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
@@ -34,3 +35,7 @@ class Dataset(TorchDataset):
     def load_dataset(self):
         """Loads (and optionally downloads) the dataset."""
         raise NotImplementedError
+
+    def create_dataloader(self, **kwargs):
+        """Returns a dataloader that represents the dataset."""
+        return DataLoader(self, **kwargs)

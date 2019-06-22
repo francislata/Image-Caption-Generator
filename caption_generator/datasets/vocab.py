@@ -4,11 +4,14 @@ import os
 import pandas as pd
 import spacy
 from tqdm import tqdm
+from torch.nn.utils.rnn import pad_sequence
+import torch
 from .util import save_to_json, load_json
 
 STOI_FILENAME = 'stoi.json'
 SOS_TOKEN = '<sos>'
 EOS_TOKEN = '<eos>'
+PAD_TOKEN = '<pad>'
 
 class Vocab: #pylint: disable=too-few-public-methods
     """This subclass manages the vocabulary of image annotations."""
@@ -36,12 +39,21 @@ class Vocab: #pylint: disable=too-few-public-methods
 
         return preprocessed_annotation
 
+    def pad_annotations(self, samples):
+        """Pads a batch of annotations when iterating through using dataloader."""
+        samples = sorted(samples, key=lambda x: len(x[1]), reverse=True)
+        imgs = torch.stack([x for x, _ in samples], dim=0) #pylint: disable=no-member
+        lbls = pad_sequence([y for _, y in samples], padding_value=self.stoi[PAD_TOKEN])
+        lbls_lengths = [len(y) for _, y in samples]
+
+        return imgs, lbls, lbls_lengths
+
     def _load_stoi(self):
         """Loads the JSON file for the strings to index mapping."""
         if os.path.isfile(self.stoi_path):
             return load_json(self.stoi_path)
 
-        return {SOS_TOKEN: 0, EOS_TOKEN: 1}
+        return {PAD_TOKEN: 0, SOS_TOKEN: 1, EOS_TOKEN: 2}
 
     def _load_vocab(self, csv_file_path):
         """Loads (and creates the vocabulary) from dataset."""
