@@ -35,7 +35,7 @@ class COCO2014(Dataset):
         else:
             img = self._create_img_filename(str(self.samples[idx][0]))
 
-        with Image.open(img) as img:
+        with Image.open(img).convert('RGB') as img:
             img = self.transforms(img)
 
             if self.is_test_set:

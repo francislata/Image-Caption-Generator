@@ -11,18 +11,20 @@ class ResNet101LSTM(nn.Module):
         self.vocab = vocab
         self._create_modules(**kwargs)
 
-    def forward(self, x, y):
+    def forward(self, x, y, y_lengths):
         # Encode the image into a fixed size vector of features
-        img_features = self.encoder(x)
-        img_features = img_features.view(img_features.size(0), -1)
+        x = self.encoder(x)
+        x = x.view(x.size(0), -1)
 
         # Run the image features through an LSTM cell to get the hidden state
-        h_state, c_state = self.lstm_cell(img_features)
-        h_state, c_state = h_state.unsqueeze(0), h_state.unsqueeze(0)
+        h_state, c_state = self.lstm_cell(x)
+        h_state, c_state = h_state.unsqueeze(0), c_state.unsqueeze(0)
 
         # Perform teacher-forcing for training the network
         y = self.emb(y)
+        y = nn.utils.rnn.pack_padded_sequence(y, y_lengths)
         y, (h_state, c_state) = self.lstm(y, (h_state, c_state))
+        y, y_lengths = nn.utils.rnn.pad_packed_sequence(y)
 
         return y
 
