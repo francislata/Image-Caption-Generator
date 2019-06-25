@@ -1,12 +1,14 @@
 """This contains helper functions that is used by datasets."""
 
 import os
-from zipfile import ZipFile
+from zipfile import ZipFile, ZipInfo
 import json
+from typing import Dict, Union, Any
+from pathlib import Path
 from tqdm import tqdm
 import requests
 
-def download_from_url(url, dst):
+def download_from_url(url: str, dst: str) -> int:
     """
     Downloads the file from the given URL and add it to the destination
 
@@ -40,7 +42,8 @@ def download_from_url(url, dst):
     print('Done!\n')
     return file_size
 
-def extract_zip(zip_file_path, destination_file_path):
+def extract_zip(zip_file_path: Union[str, Path],
+                destination_file_path: Union[str, ZipInfo, None]) -> None:
     """Extracts the ZIP file to the given destination file path."""
     print('Extracting to {}...'.format(destination_file_path))
 
@@ -52,12 +55,12 @@ def extract_zip(zip_file_path, destination_file_path):
 
     print('Done!\n')
 
-def save_to_json(data, file_path):
+def save_to_json(data: Any, file_path: Union[str, Path]) -> None:
     """Saves the data as a JSON file in the given file path."""
     with open(file_path, 'w') as json_fp:
         json.dump(data, json_fp)
 
-def load_json(file_path):
+def load_json(file_path: Union[str, Path]) -> Dict[str, str]:
     """Loads the data from the JSON file."""
     with open(file_path, 'r') as json_fp:
         return json.load(json_fp)

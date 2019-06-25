@@ -13,6 +13,7 @@ requests = "*"
 pandas = "*"
 matplotlib = "*"
 cython = "*"
+mypy = "*"
 
 [packages]
 torch = "*"
@@ -25,3 +26,4 @@ python_version = "3.7"
 
 [scripts]
 install_cocoapi = "bash ./tasks/install_cocoapi.sh"
+lint_project = "bash ./tasks/lint_project.sh"

@@ -3,14 +3,16 @@
 from collections import defaultdict
 from pathlib import Path
 import os
+from typing import Union, Tuple, DefaultDict, Optional
 from PIL import Image
 import toml
 import pandas as pd
 from tqdm import tqdm
-import torch
+from torch import LongTensor
 from pycocotools.coco import COCO
 from .dataset import Dataset
 from .util import download_from_url, extract_zip
+from .vocab import Vocab
 
 DATASET_PATH = Path(__file__).parents[2]/'data'/'raw'/'coco2014'
 METADATA_PATH = DATASET_PATH/'metadata.toml'
@@ -20,16 +22,16 @@ TEST_IMG_FILENAME = 'COCO_test2014_{}.jpg'
 
 class COCO2014(Dataset):
     """A subclass defining the COCO 2014 dataset."""
-    def __init__(self, is_validation_set=False, is_test_set=False):
+    def __init__(self, is_validation_set: bool = False, is_test_set: bool = False) -> None:
         super(COCO2014, self).__init__(DATASET_PATH, METADATA_PATH, is_validation_set, is_test_set)
 
-        self.vocab = None
+        self.vocab: Optional[Vocab] = None
         self.load_dataset()
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.samples)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Union[Tuple[Image, LongTensor], Image]:
         if self.is_test_set:
             img = self._create_img_filename(self.samples[idx][0], is_img_id=False)
         else:
@@ -41,21 +43,26 @@ class COCO2014(Dataset):
             if self.is_test_set:
                 return img
 
-            return img, torch.LongTensor(self.vocab.preprocess_annotation(self.samples[idx][-1])) #pylint: disable=no-member
+            return img, LongTensor(self.vocab.preprocess_annotation(self.samples[idx][-1])) #type: ignore #pylint: disable=line-too-long
 
-    def load_dataset(self):
+    def load_dataset(self) -> None:
         metadata = toml.load(self.metadata_path)
         ds_url, anns_url = metadata['train_ds_url'], metadata['anns_url']
         ds_path = os.path.join(self.dataset_path, metadata['train_ds_filename'])
         ds_csv_filename = os.path.join(self.dataset_path, metadata['train_ds_csv_filename'])
-        anns_path = os.path.join(self.dataset_path, metadata['anns_filename'])
-        anns_file_path = os.path.join(anns_path[:-4], metadata['train_ds_anns_filename'])
+        anns_path: Optional[str] = os.path.join(self.dataset_path, metadata['anns_filename'])
+
+        if anns_path:
+            anns_file_path: Optional[str] = os.path.join(anns_path[:-4],
+                                                         metadata['train_ds_anns_filename'])
 
         if self.is_validation_set:
             ds_url = metadata['val_ds_url']
             ds_path = os.path.join(self.dataset_path, metadata['val_ds_filename'])
             ds_csv_filename = os.path.join(self.dataset_path, metadata['val_ds_csv_filename'])
-            anns_file_path = os.path.join(anns_path[:-4], metadata['val_ds_anns_filename'])
+
+            if anns_path:
+                anns_file_path = os.path.join(anns_path[:-4], metadata['val_ds_anns_filename'])
         elif self.is_test_set:
             ds_url = metadata['test_ds_url']
             ds_path = os.path.join(self.dataset_path, metadata['test_ds_filename'])
@@ -66,25 +73,25 @@ class COCO2014(Dataset):
         download_from_url(ds_url, ds_path)
 
         if not os.path.isdir(ds_path[:-4]):
-            extract_zip(ds_path, self.dataset_path)
+            extract_zip(ds_path, str(self.dataset_path))
 
         # Download annotations
         if anns_url and anns_path:
             download_from_url(anns_url, anns_path)
 
             if not os.path.isdir(anns_path[:-4]):
-                extract_zip(anns_path, self.dataset_path)
+                extract_zip(anns_path, str(self.dataset_path))
 
         if os.path.isfile(ds_csv_filename):
-            self.samples = pd.read_csv(ds_csv_filename)
+            samples = pd.read_csv(ds_csv_filename)
         else:
-            self.samples = self._create_img_to_lbl_csv(ds_path[:-4],
-                                                       anns_file_path,
-                                                       ds_csv_filename)
+            samples = self._create_img_to_lbl_csv(ds_path[:-4],
+                                                  anns_file_path,
+                                                  ds_csv_filename)
 
-        self.samples = self.samples.values.tolist()
+        self.samples = samples.values.tolist()
 
-    def _create_img_filename(self, img, is_img_id=True):
+    def _create_img_filename(self, img: str, is_img_id: bool = True) -> str:
         """Creates the complete image filename based on the image ID."""
         metadata = toml.load(self.metadata_path)
         img_filename = TRAIN_IMG_FILENAME
@@ -102,9 +109,12 @@ class COCO2014(Dataset):
 
         return os.path.join(dir_file_path[:-4], img)
 
-    def _create_img_to_lbl_csv(self, ds_path, anns_file_path, csv_filename): #pylint: disable=no-self-use
+    def _create_img_to_lbl_csv(self, #pylint: disable=no-self-use
+                               ds_path: str,
+                               anns_file_path: Optional[str],
+                               csv_filename: str) -> pd.DataFrame:
         """Creates a CSV file used for mapping images to its labels."""
-        img_caps_mapping = defaultdict(list)
+        img_caps_mapping: DefaultDict[str, list] = defaultdict(list)
         image_ids, annotations = [], []
 
         if anns_file_path:

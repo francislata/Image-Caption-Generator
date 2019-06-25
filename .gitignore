@@ -10,6 +10,9 @@ __pycache__
 # Jupyter files
 .ipynb_checkpoints
 
+# mypy files
+.mypy_cache
+
 # Project files
 data/raw/coco2014/train2014.zip
 data/raw/coco2014/val2014.zip
