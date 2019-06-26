@@ -12,7 +12,6 @@ from torch import LongTensor, Tensor
 from pycocotools.coco import COCO
 from .dataset import Dataset
 from .util import download_from_url, extract_zip
-from .vocab import Vocab
 
 DATASET_PATH = Path(__file__).parents[2]/'data'/'raw'/'coco2014'
 METADATA_PATH = DATASET_PATH/'metadata.toml'
@@ -25,7 +24,6 @@ class COCO2014(Dataset):
     def __init__(self, is_validation_set: bool = False, is_test_set: bool = False) -> None:
         super(COCO2014, self).__init__(DATASET_PATH, METADATA_PATH, is_validation_set, is_test_set)
 
-        self.vocab: Optional[Vocab] = None
         self.load_dataset()
 
     def __len__(self) -> int:

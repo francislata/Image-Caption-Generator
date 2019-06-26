@@ -1,11 +1,12 @@
 """This contains the base class that represents any dataset used."""
 
-from typing import Tuple, List, Union, Any
+from typing import Tuple, List, Union, Any, Optional
 from pathlib import Path
 from torch import LongTensor, Tensor
 from torch.utils.data import Dataset as TorchDataset
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
+from .vocab import Vocab
 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
@@ -28,6 +29,7 @@ class Dataset(TorchDataset):
             ToTensor(),
             Normalize(IMAGENET_MEAN, IMAGENET_STD)
         ])
+        self.vocab: Optional[Vocab] = None
 
     def __len__(self) -> int:
         raise NotImplementedError
