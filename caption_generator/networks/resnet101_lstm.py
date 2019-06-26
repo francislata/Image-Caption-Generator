@@ -1,17 +1,20 @@
 """This contains the ResNet101 and LSTM network for the encoder-decoder network."""
 
+from typing import List, Any
 from torchvision.models import resnet101
 import torch.nn as nn
+from torch import Tensor
+from ..datasets.vocab import Vocab
 
 class ResNet101LSTM(nn.Module):
     """This subclass creates a network with ResNet101 and LSTM."""
-    def __init__(self, vocab, **kwargs):
+    def __init__(self, vocab: Vocab, **kwargs: Any) -> None:
         super(ResNet101LSTM, self).__init__()
 
         self.vocab = vocab
         self._create_modules(**kwargs)
 
-    def forward(self, x, y, y_lengths):
+    def forward(self, x: Tensor, y: Tensor, y_lengths: List[int]) -> Tensor: #type: ignore
         # Encode the image into a fixed size vector of features
         x = self.encoder(x)
         x = x.view(x.size(0), -1)
@@ -29,13 +32,13 @@ class ResNet101LSTM(nn.Module):
         return y
 
     def _create_modules(self,
-                        pretrained,
-                        num_img_features,
-                        embedding_dim,
-                        hidden_size,
-                        bidirectional=False,
-                        num_layers=1,
-                        dropout=0):
+                        pretrained: bool,
+                        num_img_features: int,
+                        embedding_dim: int,
+                        hidden_size: int,
+                        bidirectional: bool = False,
+                        num_layers: int = 1,
+                        dropout: int = 0) -> None:
         """Creates the modules for this network."""
         modified_encoder = list(resnet101(pretrained=pretrained).children())[:-1]
 
