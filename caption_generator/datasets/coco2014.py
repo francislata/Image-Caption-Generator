@@ -8,7 +8,7 @@ from PIL import Image
 import toml
 import pandas as pd
 from tqdm import tqdm
-from torch import LongTensor
+from torch import LongTensor, Tensor
 from pycocotools.coco import COCO
 from .dataset import Dataset
 from .util import download_from_url, extract_zip
@@ -31,13 +31,13 @@ class COCO2014(Dataset):
     def __len__(self) -> int:
         return len(self.samples)
 
-    def __getitem__(self, idx: int) -> Union[Tuple[Image, LongTensor], Image]:
+    def __getitem__(self, idx: int) -> Union[Tuple[Tensor, LongTensor], Tensor]:
         if self.is_test_set:
-            img = self._create_img_filename(self.samples[idx][0], is_img_id=False)
+            img_filename = self._create_img_filename(self.samples[idx][0], is_img_id=False)
         else:
-            img = self._create_img_filename(str(self.samples[idx][0]))
+            img_filename = self._create_img_filename(str(self.samples[idx][0]))
 
-        with Image.open(img).convert('RGB') as img:
+        with Image.open(img_filename).convert('RGB') as img:
             img = self.transforms(img)
 
             if self.is_test_set:

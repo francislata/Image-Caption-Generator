@@ -3,7 +3,7 @@
 import os
 from zipfile import ZipFile, ZipInfo
 import json
-from typing import Dict, Union, Any
+from typing import Union, Any
 from pathlib import Path
 from tqdm import tqdm
 import requests
@@ -60,7 +60,7 @@ def save_to_json(data: Any, file_path: Union[str, Path]) -> None:
     with open(file_path, 'w') as json_fp:
         json.dump(data, json_fp)
 
-def load_json(file_path: Union[str, Path]) -> Dict[str, str]:
+def load_json(file_path: Union[str, Path]) -> Any:
     """Loads the data from the JSON file."""
     with open(file_path, 'r') as json_fp:
         return json.load(json_fp)
