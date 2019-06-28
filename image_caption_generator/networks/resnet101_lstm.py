@@ -28,11 +28,11 @@ class ResNet101LSTM(nn.Module):
         y = nn.utils.rnn.pack_padded_sequence(y, y_lengths)
         y, (h_state, c_state) = self.lstm(y, (h_state, c_state))
         y, y_lengths = nn.utils.rnn.pad_packed_sequence(y)
+        y = self.linear(y)
 
         return y
 
     def _create_modules(self,
-                        pretrained: bool,
                         num_img_features: int,
                         embedding_dim: int,
                         hidden_size: int,
@@ -40,7 +40,7 @@ class ResNet101LSTM(nn.Module):
                         num_layers: int = 1,
                         dropout: int = 0) -> None:
         """Creates the modules for this network."""
-        modified_encoder = list(resnet101(pretrained=pretrained).children())[:-1]
+        modified_encoder = list(resnet101(pretrained=True).children())[:-1]
 
         self.encoder = nn.Sequential(*modified_encoder)
         self.emb = nn.Embedding(len(self.vocab.stoi), embedding_dim)
@@ -52,3 +52,4 @@ class ResNet101LSTM(nn.Module):
             num_layers=num_layers,
             dropout=dropout
         )
+        self.linear = nn.Linear(hidden_size, len(self.vocab.stoi))

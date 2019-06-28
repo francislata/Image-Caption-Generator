@@ -1,10 +1,10 @@
 # This contains a convenient way to lint the project.
 echo "Linting..."
-pylint --score n caption_generator/
+pylint --score n image_caption_generator/ training/
 echo "Done!"
 echo ""
 
 echo "Type-checking..."
-mypy caption_generator/
+mypy image_caption_generator/ training/
 echo "Done!"
 echo ""
