@@ -1,6 +1,7 @@
 """This contains the base definition of a model."""
 
 from typing import Optional, Any, Mapping
+import torch
 from torch.nn import Module, CrossEntropyLoss
 from torch.optim.optimizer import Optimizer #pylint: disable=no-name-in-module
 from torch.optim import SGD
@@ -16,7 +17,8 @@ class Model:
                  val_ds: Optional[Dataset] = None,
                  test_ds: Optional[Dataset] = None,
                  network_kwargs: Optional[Mapping] = None) -> None:
-        self.network = network_cls(**(network_kwargs if network_kwargs else {}))
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.network = network_cls(**(network_kwargs if network_kwargs else {})).to(self.device)
         self.train_ds = train_ds
         self.val_ds = val_ds
         self.test_ds = test_ds
@@ -76,6 +78,8 @@ class Model:
             self.network.eval()
 
         for inps, lbls, lbl_lengths in tqdm(dataloader, desc='Iteration'):
+            inps, lbls = inps.to(self.device), lbls.to(self.device)
+
             if is_training:
                 optimizer.zero_grad()
 
