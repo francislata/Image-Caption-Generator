@@ -74,6 +74,8 @@ class Model:
                    optimizer: Optimizer,
                    is_training=True) -> float:
         """Runs an epoch through the dataset."""
+        torch.cuda.empty_cache()
+        
         losses = []
 
         if is_training:
