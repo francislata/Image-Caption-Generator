@@ -18,6 +18,7 @@ class ResNet101LSTM(nn.Module):
         # Encode the image into a fixed size vector of features
         x = self.encoder(x)
         x = x.view(x.size(0), -1)
+        x = self.img_linear(x)
 
         # Run the image features through an LSTM cell to get the hidden state
         h_state, c_state = self.lstm_cell(x)
@@ -28,7 +29,7 @@ class ResNet101LSTM(nn.Module):
         y = nn.utils.rnn.pack_padded_sequence(y, y_lengths)
         y, (h_state, c_state) = self.lstm(y, (h_state, c_state))
         y, y_lengths = nn.utils.rnn.pad_packed_sequence(y)
-        y = self.linear(y)
+        y = self.linear(y.squeeze())
 
         return y
 
@@ -40,11 +41,16 @@ class ResNet101LSTM(nn.Module):
                         num_layers: int = 1,
                         dropout: int = 0) -> None:
         """Creates the modules for this network."""
-        modified_encoder = list(resnet101(pretrained=True).children())[:-1]
 
+        # Setup encoder
+        modified_encoder = list(resnet101(pretrained=True).children())[:-1]
         self.encoder = nn.Sequential(*modified_encoder)
+        self.encoder.requires_grad = False
+        self.img_linear = nn.Linear(num_img_features, embedding_dim)
+
+        # Setup decoder
+        self.lstm_cell = nn.LSTMCell(embedding_dim, hidden_size)
         self.emb = nn.Embedding(len(self.vocab.stoi), embedding_dim)
-        self.lstm_cell = nn.LSTMCell(num_img_features, hidden_size)
         self.lstm = nn.LSTM(
             embedding_dim,
             hidden_size,

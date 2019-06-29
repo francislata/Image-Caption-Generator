@@ -1,7 +1,6 @@
 """This contains the base definition of a model."""
 
 from typing import Optional, Any, Mapping
-import torch
 from torch.nn import Module, CrossEntropyLoss
 from torch.optim.optimizer import Optimizer #pylint: disable=no-name-in-module
 from torch.optim import SGD
@@ -81,9 +80,7 @@ class Model:
                 optimizer.zero_grad()
 
             preds = self.network(inps, lbls, lbl_lengths)
-            preds = preds.view(preds.size(1), preds.size(2), preds.size(0))
-
-            loss = loss_fn(preds, lbls.t())
+            loss = loss_fn(preds, lbls.squeeze())
             loss.backward()
 
             if is_training:
