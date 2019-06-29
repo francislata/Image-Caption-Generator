@@ -58,18 +58,17 @@ class Model:
             val_dl_kwargs = val_dl_kwargs if val_dl_kwargs else train_dl_kwargs
             val_dl = self.val_ds.create_dataloader(**val_dl_kwargs)
 
-        for epoch in tqdm(iterable=range(num_epochs),
-                          total=len(range(num_epochs)),
-                          desc='Epoch Progress'):
-            train_loss = self._run_epoch(train_dl, loss_fn, optimizer)
+        for epoch in range(num_epochs):
+            train_loss = self._run_epoch(epoch, train_dl, loss_fn, optimizer)
 
             print("[Epoch {}] Training loss is {:.2f}\n".format(epoch, train_loss))
 
             if val_dl:
-                val_loss = self._run_epoch(train_dl, loss_fn, optimizer, is_training=False)
+                val_loss = self._run_epoch(epoch, train_dl, loss_fn, optimizer, is_training=False)
                 print("[Epoch {}] Validation loss is {:.2f}\n".format(epoch, val_loss))
 
     def _run_epoch(self,
+                   epoch: int,
                    dataloader: DataLoader,
                    loss_fn: Module,
                    optimizer: Optimizer,
@@ -82,7 +81,7 @@ class Model:
         else:
             self.network.eval()
 
-        for inps, lbls, lbl_lengths in tqdm(dataloader, desc='Iteration'):
+        for inps, lbls, lbl_lengths in tqdm(dataloader, desc='Epoch {}'.format(epoch)):
             inps, lbls = inps.to(self.device), lbls.to(self.device)
 
             if is_training:
