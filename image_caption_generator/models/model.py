@@ -80,7 +80,10 @@ class Model:
                 optimizer.zero_grad()
 
             preds = self.network(inps, lbls, lbl_lengths)
-            loss = loss_fn(preds, lbls.squeeze())
+            preds = preds.view(preds.size(1), preds.size(2), preds.size(0))
+            lbls = lbls.t()
+
+            loss = loss_fn(preds, lbls)
             loss.backward()
 
             if is_training:

@@ -29,7 +29,7 @@ class ResNet101LSTM(nn.Module):
         y = nn.utils.rnn.pack_padded_sequence(y, y_lengths)
         y, (h_state, c_state) = self.lstm(y, (h_state, c_state))
         y, y_lengths = nn.utils.rnn.pad_packed_sequence(y)
-        y = self.linear(y.squeeze())
+        y = self.linear(y)
 
         return y
 
