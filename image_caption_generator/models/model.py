@@ -93,9 +93,9 @@ class Model:
 
             loss = loss_fn(preds, lbls)
             losses.append(loss.item())
-            loss.backward()
 
             if is_training:
+                loss.backward()
                 optimizer.step()
 
         return sum(losses) / len(losses)
