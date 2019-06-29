@@ -64,7 +64,7 @@ class Model:
             print("[Epoch {}] Training loss is {:.2f}\n".format(epoch, train_loss))
 
             if val_dl:
-                val_loss = self._run_epoch(epoch, train_dl, loss_fn, optimizer, is_training=False)
+                val_loss = self._run_epoch(epoch, val_dl, loss_fn, optimizer, is_training=False)
                 print("[Epoch {}] Validation loss is {:.2f}\n".format(epoch, val_loss))
 
     def _run_epoch(self,
@@ -75,7 +75,7 @@ class Model:
                    is_training=True) -> float:
         """Runs an epoch through the dataset."""
         torch.cuda.empty_cache()
-        
+
         losses = []
 
         if is_training:
