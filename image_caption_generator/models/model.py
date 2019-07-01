@@ -62,22 +62,26 @@ class Model:
         wandb.watch(self.network)
 
         for epoch in range(1, num_epochs + 1):
-            self._run_epoch(epoch, train_dl, loss_fn, optimizer)
+            train_loss = self._run_epoch(epoch, train_dl, loss_fn, optimizer)
+            print('[Epoch {}] Training loss: {:.3f}'.format(epoch, train_loss))
 
             if val_dl:
-                self._run_epoch(epoch, val_dl, loss_fn, optimizer, is_training=False)
+                val_loss = self._run_epoch(epoch, val_dl, loss_fn, optimizer, is_training=False)
+                print('[Epoch {}] Validation loss: {:.3f}'.format(epoch, val_loss))
 
     def _run_epoch(self,
                    epoch: int,
                    dataloader: DataLoader,
                    loss_fn: Module,
                    optimizer: Optimizer,
-                   is_training=True) -> None:
+                   is_training=True) -> float:
         """Runs an epoch through the dataset."""
         if is_training:
             self.network.train()
         else:
             self.network.eval()
+
+        losses = []
 
         for inps, lbls, lbl_lengths in tqdm(dataloader, desc='Epoch {}'.format(epoch)):
             inps, lbls = inps.to(self.device), lbls.to(self.device)
@@ -90,6 +94,7 @@ class Model:
             lbls = lbls.t()
 
             loss = loss_fn(preds, lbls)
+            losses.append(loss.item())
 
             if is_training:
                 loss.backward()
@@ -99,3 +104,5 @@ class Model:
                 wandb.log({'train_loss': loss})
             else:
                 wandb.log({'val_loss': loss})
+
+        return sum(losses) / len(losses)

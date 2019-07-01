@@ -20,4 +20,4 @@ class ImageCaptionGeneratorModel(Model):
                                                          network_kwargs=network_kwargs)
 
     def learning_rate(self):
-        return 1e-2
+        return 1e-1
