@@ -39,28 +39,29 @@ def main(args: Namespace) -> None:
     # Create model
     network_cls = getattr(import_module(NETWORKS_MODULE), args.network)
     models_module = import_module(MODELS_MODULE)
-    network_kwargs = json.loads(args.network_kwargs) if args.network_kwargs else {}
-    network_kwargs = {'vocab': train_ds.vocab, **network_kwargs}
+    args.network_kwargs = json.loads(args.network_kwargs)
+    args.network_kwargs = {'vocab': train_ds.vocab, **args.network_kwargs}
     model = getattr(models_module, args.model)(train_ds,
                                                network_cls=network_cls,
-                                               network_kwargs=network_kwargs,
+                                               network_kwargs=args.network_kwargs,
                                                val_ds=val_ds,
                                                test_ds=test_ds)
 
     # Train model
-    train_dl_kwargs = json.loads(args.train_dl_kwargs)
-    train_dl_kwargs = {'collate_fn': train_ds.vocab.pad_annotations, **train_dl_kwargs}
-    val_dl_kwargs = args.val_dl_kwargs if args.val_dl_kwargs else train_dl_kwargs
+    args.train_dl_kwargs = json.loads(args.train_dl_kwargs)
+    args.train_dl_kwargs = {'collate_fn': train_ds.vocab.pad_annotations, **args.train_dl_kwargs}
+    args.val_dl_kwargs = args.val_dl_kwargs if args.val_dl_kwargs else args.train_dl_kwargs
 
     if args.use_wandb:
         _initialize_wandb(args)
 
-    model.train(args.num_epochs, train_dl_kwargs, val_dl_kwargs)
+    model.train(args.num_epochs, args.train_dl_kwargs, args.val_dl_kwargs)
 
 def _initialize_wandb(args: Namespace) -> None:
     """Initializes Weights and Biases."""
     config = {'num_epochs': args.num_epochs,
               'train_dl_kwargs': args.train_dl_kwargs,
+              'val_dl_kwargs': args.val_dl_kwargs,
               'network_kwargs': args.network_kwargs}
 
     wandb.init(project=WANDB_PROJECT_NAME, config=config)
@@ -72,13 +73,13 @@ def _parse_args() -> Namespace:
     # Required arguments
     arg_parser.add_argument('model', type=str, help='The model to use.')
     arg_parser.add_argument('network', type=str, help='The network for the model to use.')
+    arg_parser.add_argument('network_kwargs',
+                            type=str,
+                            help='The keyword arguments for the network.')
     arg_parser.add_argument('dataset', type=str, help='The dataset to use.')
     arg_parser.add_argument('train_dl_kwargs',
                             type=str,
                             help='The keyword arguments for the training dataloader.')
-    arg_parser.add_argument('network_kwargs',
-                            type=str,
-                            help='The keyword arguments for the network.')
 
     # Optional arguments
     arg_parser.add_argument('--num-epochs',
