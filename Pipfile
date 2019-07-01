@@ -20,6 +20,7 @@ torch = "*"
 torchvision = "*"
 tqdm = "*"
 spacy = "*"
+wandb = "*"
 
 [requires]
 python_version = "3.7"

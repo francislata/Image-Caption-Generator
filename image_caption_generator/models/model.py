@@ -49,7 +49,7 @@ class Model:
     def train(self,
               num_epochs: int,
               train_dl_kwargs: Any,
-              val_dl_kwargs: Optional[Any] = None) -> None:
+              val_dl_kwargs: Any) -> None:
         """Trains the network."""
         optimizer, loss_fn = self.optimizer(), self.loss_fn()
         train_dl = self.train_ds.create_dataloader(**train_dl_kwargs)

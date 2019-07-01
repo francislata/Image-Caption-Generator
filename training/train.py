@@ -7,11 +7,13 @@ import sys
 import os
 import json
 import toml
+import wandb
 
 RAW_DATA_PATH = str(Path(__file__).resolve().parents[1]/'data'/'raw')
 DS_MODULE = 'image_caption_generator.datasets'
 MODELS_MODULE = 'image_caption_generator.models'
 NETWORKS_MODULE = 'image_caption_generator.networks'
+WANDB_PROJECT_NAME = 'image-caption-generator'
 
 def main(args: Namespace) -> None:
     """The main entrypoint of the program."""
@@ -48,35 +50,51 @@ def main(args: Namespace) -> None:
     # Train model
     train_dl_kwargs = json.loads(args.train_dl_kwargs)
     train_dl_kwargs = {'collate_fn': train_ds.vocab.pad_annotations, **train_dl_kwargs}
-    model.train(args.num_epochs, train_dl_kwargs)
+    val_dl_kwargs = args.val_dl_kwargs if args.val_dl_kwargs else train_dl_kwargs
+
+    if args.use_wandb:
+        _initialize_wandb(args)
+
+    model.train(args.num_epochs, train_dl_kwargs, val_dl_kwargs)
+
+def _initialize_wandb(args: Namespace) -> None:
+    """Initializes Weights and Biases."""
+    config = {'num_epochs': args.num_epochs,
+              'train_dl_kwargs': args.train_dl_kwargs,
+              'network_kwargs': args.network_kwargs}
+
+    wandb.init(project=WANDB_PROJECT_NAME, config=config)
 
 def _parse_args() -> Namespace:
     """Parses and returns parsed command-line arguments."""
     arg_parser = ArgumentParser(description='Trains a given model using a specific dataset.')
 
     # Required arguments
-    arg_parser.add_argument('model', type=str, help='the model to use')
-    arg_parser.add_argument('network', type=str, help='the network for the model to use')
-    arg_parser.add_argument('dataset', type=str, help='the dataset to use')
+    arg_parser.add_argument('model', type=str, help='The model to use.')
+    arg_parser.add_argument('network', type=str, help='The network for the model to use.')
+    arg_parser.add_argument('dataset', type=str, help='The dataset to use.')
     arg_parser.add_argument('train_dl_kwargs',
                             type=str,
-                            help='the keyword arguments for the training dataloader')
+                            help='The keyword arguments for the training dataloader.')
+    arg_parser.add_argument('network_kwargs',
+                            type=str,
+                            help='The keyword arguments for the network.')
 
     # Optional arguments
     arg_parser.add_argument('--num-epochs',
                             type=int,
                             default=10,
-                            help='the number of epochs to train the model for')
+                            help='The number of epochs to train the model for.')
     arg_parser.add_argument('--val-dl-kwargs',
                             type=str,
-                            help='the keyword arguments for the validation dataloader')
+                            help='The keyword arguments for the validation dataloader.')
     arg_parser.add_argument('--test-dl-kwargs',
                             type=str,
-                            help='the keyword arguments for the test dataloader')
-    arg_parser.add_argument('--model-kwargs', type=str, help='the keyword arguments for the model')
-    arg_parser.add_argument('--network-kwargs',
-                            type=str,
-                            help='the keyword arguments for the network')
+                            help='The keyword arguments for the test dataloader.')
+    arg_parser.add_argument('--model-kwargs', type=str, help='The keyword arguments for the model.')
+    arg_parser.add_argument('--use-wandb',
+                            action='store_true',
+                            help='A flag indicating to use weights and biases.')
 
     return arg_parser.parse_args()
 
