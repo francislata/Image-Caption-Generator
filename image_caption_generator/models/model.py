@@ -50,7 +50,8 @@ class Model:
     def train(self,
               num_epochs: int,
               train_dl_kwargs: Any,
-              val_dl_kwargs: Any) -> None:
+              val_dl_kwargs: Any,
+              use_wandb: bool = True) -> None:
         """Trains the network."""
         optimizer, loss_fn = self.optimizer(), self.loss_fn()
         train_dl = self.train_ds.create_dataloader(**train_dl_kwargs)
@@ -59,14 +60,20 @@ class Model:
             val_dl_kwargs = val_dl_kwargs if val_dl_kwargs else train_dl_kwargs
             val_dl = self.val_ds.create_dataloader(**val_dl_kwargs)
 
-        wandb.watch(self.network)
+        if use_wandb:
+            wandb.watch(self.network)
 
         for epoch in range(1, num_epochs + 1):
-            train_loss = self._run_epoch(epoch, train_dl, loss_fn, optimizer)
+            train_loss = self._run_epoch(epoch, train_dl, loss_fn, optimizer, use_wandb=use_wandb)
             print('[Epoch {}] Training loss: {:.3f}'.format(epoch, train_loss))
 
             if val_dl:
-                val_loss = self._run_epoch(epoch, val_dl, loss_fn, optimizer, is_training=False)
+                val_loss = self._run_epoch(epoch,
+                                           val_dl,
+                                           loss_fn,
+                                           optimizer,
+                                           is_training=False,
+                                           use_wandb=use_wandb)
                 print('[Epoch {}] Validation loss: {:.3f}'.format(epoch, val_loss))
 
     def _run_epoch(self,
@@ -74,7 +81,8 @@ class Model:
                    dataloader: DataLoader,
                    loss_fn: Module,
                    optimizer: Optimizer,
-                   is_training=True) -> float:
+                   is_training: bool = True,
+                   use_wandb: bool = True) -> float:
         """Runs an epoch through the dataset."""
         if is_training:
             self.network.train()
@@ -100,9 +108,10 @@ class Model:
                 loss.backward()
                 optimizer.step()
 
-            if is_training:
-                wandb.log({'train_loss': loss})
-            else:
-                wandb.log({'val_loss': loss})
+            if use_wandb:
+                if is_training:
+                    wandb.log({'train_loss': loss})
+                else:
+                    wandb.log({'val_loss': loss})
 
         return sum(losses) / len(losses)

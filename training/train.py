@@ -55,7 +55,7 @@ def main(args: Namespace) -> None:
     if args.use_wandb:
         _initialize_wandb(args)
 
-    model.train(args.num_epochs, args.train_dl_kwargs, args.val_dl_kwargs)
+    model.train(args.num_epochs, args.train_dl_kwargs, args.val_dl_kwargs, use_wandb=args.use_wandb)
 
 def _initialize_wandb(args: Namespace) -> None:
     """Initializes Weights and Biases."""
