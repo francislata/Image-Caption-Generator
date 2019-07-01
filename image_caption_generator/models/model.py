@@ -96,6 +96,6 @@ class Model:
                 optimizer.step()
 
             if is_training:
-                wandb.log({'train_loss': loss, 'epoch': epoch})
+                wandb.log({'train_loss': loss})
             else:
-                wandb.log({'val_loss': loss, 'epoch': epoch})
+                wandb.log({'val_loss': loss})
