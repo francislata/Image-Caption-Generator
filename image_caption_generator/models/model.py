@@ -7,6 +7,7 @@ from torch.optim.optimizer import Optimizer #pylint: disable=no-name-in-module
 from torch.optim import SGD
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import wandb
 from ..datasets.dataset import Dataset
 
 class Model:
@@ -58,26 +59,21 @@ class Model:
             val_dl_kwargs = val_dl_kwargs if val_dl_kwargs else train_dl_kwargs
             val_dl = self.val_ds.create_dataloader(**val_dl_kwargs)
 
-        for epoch in range(1, num_epochs + 1):
-            train_loss = self._run_epoch(epoch, train_dl, loss_fn, optimizer)
+        wandb.watch(self.network)
 
-            print("[Epoch {}] Training loss is {:.2f}\n".format(epoch, train_loss))
+        for epoch in range(1, num_epochs + 1):
+            self._run_epoch(epoch, train_dl, loss_fn, optimizer)
 
             if val_dl:
-                val_loss = self._run_epoch(epoch, val_dl, loss_fn, optimizer, is_training=False)
-                print("[Epoch {}] Validation loss is {:.2f}\n".format(epoch, val_loss))
+                self._run_epoch(epoch, val_dl, loss_fn, optimizer, is_training=False)
 
     def _run_epoch(self,
                    epoch: int,
                    dataloader: DataLoader,
                    loss_fn: Module,
                    optimizer: Optimizer,
-                   is_training=True) -> float:
+                   is_training=True) -> None:
         """Runs an epoch through the dataset."""
-        torch.cuda.empty_cache()
-
-        losses = []
-
         if is_training:
             self.network.train()
         else:
@@ -94,10 +90,12 @@ class Model:
             lbls = lbls.t()
 
             loss = loss_fn(preds, lbls)
-            losses.append(loss.item())
 
             if is_training:
                 loss.backward()
                 optimizer.step()
 
-        return sum(losses) / len(losses)
+            if is_training:
+                wandb.log({'train_loss': loss, 'epoch': epoch})
+            else:
+                wandb.log({'val_loss': loss, 'epoch': epoch})
