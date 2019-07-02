@@ -65,7 +65,7 @@ class Model:
 
         for epoch in range(1, num_epochs + 1):
             train_loss = self._run_epoch(epoch, train_dl, loss_fn, optimizer, use_wandb=use_wandb)
-            print('[Epoch {}] Training loss: {:.3f}'.format(epoch, train_loss))
+            print('[Epoch {}] Training loss: {:.3f}\n'.format(epoch, train_loss))
 
             if val_dl:
                 val_loss = self._run_epoch(epoch,
@@ -74,7 +74,7 @@ class Model:
                                            optimizer,
                                            is_training=False,
                                            use_wandb=use_wandb)
-                print('[Epoch {}] Validation loss: {:.3f}'.format(epoch, val_loss))
+                print('[Epoch {}] Validation loss: {:.3f}\n'.format(epoch, val_loss))
 
     def _run_epoch(self,
                    epoch: int,
@@ -91,7 +91,7 @@ class Model:
 
         losses = []
 
-        for inps, lbls, lbl_lengths in tqdm(dataloader, desc='Epoch {}'.format(epoch)):
+        for inps, lbls, lbl_lengths in tqdm(dataloader, desc='[Epoch {}]'.format(epoch)):
             inps, lbls = inps.to(self.device), lbls.to(self.device)
 
             if is_training:
